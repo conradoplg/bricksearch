@@ -7,12 +7,13 @@ import net.cryptoland.bricksearch.SetDatabase;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.TableModel;
 import java.io.IOException;
 import java.util.List;
 
 public class SearchWindow {
     private JTextField searchText;
-    private JList resultList;
+    private JTable resultList;
     private JPanel rootPanel;
 
     private PartDatabase partDB = new PartDatabase();
@@ -46,21 +47,31 @@ public class SearchWindow {
 
     private void searchKeyTyped() {
         String query = searchText.getText();
-        DefaultListModel<Part> model = new DefaultListModel<Part>();
         if (query.length() > 0) {
             List<Part> parts = partDB.textSearch(query);
-            for (Part part: parts) {
-                model.addElement(part);
-            }
+            TableModel model = new PartTableModel(parts);
+            resultList.setModel(model);
         }
-        resultList.setModel(model);
     }
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("SearchWindow");
-        frame.setContentPane(new SearchWindow().rootPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            JFrame frame = new JFrame("SearchWindow");
+            frame.setContentPane(new SearchWindow().rootPanel);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(600, 400);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
     }
 }

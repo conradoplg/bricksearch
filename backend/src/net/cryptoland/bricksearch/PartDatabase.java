@@ -69,7 +69,7 @@ public class PartDatabase {
 
     private boolean matches(String s, String[] terms) {
         for (String term : terms) {
-            if (s.contains(term)) {
+            if (!s.contains(term)) {
                 return false;
             }
         }
