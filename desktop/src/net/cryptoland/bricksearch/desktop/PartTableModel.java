@@ -4,14 +4,19 @@ import net.cryptoland.bricksearch.Part;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import java.util.HashMap;
 import java.util.List;
 
 public class PartTableModel extends AbstractTableModel {
-    List<Part> parts;
-    String[] columnHeaders = {"", "ID", "Usage", "Description"};
+    private List<Part> parts;
+    private HashMap<String, LoadImageTask> images;
+    private String[] columnHeaders = {"", "ID", "Usage", "Description"};
+    private IGetIconListener iconListener;
 
-    public PartTableModel(List<Part> parts) {
+    public PartTableModel(List<Part> parts, HashMap<String, LoadImageTask> images, IGetIconListener iconListener) {
         this.parts = parts;
+        this.images = images;
+        this.iconListener = iconListener;
     }
 
     @Override
@@ -50,8 +55,12 @@ public class PartTableModel extends AbstractTableModel {
         Part part = parts.get(rowIndex);
         switch (columnIndex) {
             case 0:
-                System.out.println("Request: " + rowIndex);
-                return null;
+                LoadImageTask task = images.get(parts.get(rowIndex).getId());
+                if (task == null) {
+                    iconListener.getIcon(rowIndex, parts.get(rowIndex).getId());
+                    return null;
+                }
+                return task.icon;
             case 1:
                 return part.getId();
             case 2:
@@ -61,5 +70,10 @@ public class PartTableModel extends AbstractTableModel {
             default:
                 return null;
         }
+    }
+
+    public void addIcon(LoadImageTask task) {
+        images.put(task.id, task);
+        fireTableCellUpdated(task.row, 0);
     }
 }
