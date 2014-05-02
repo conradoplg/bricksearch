@@ -38,6 +38,9 @@ public class PartDatabase {
 
     public List<Part> textSearch(String query) {
         List<Part> r = new ArrayList<Part>();
+        if (query.length() == 0) {
+            return r;
+        }
         String[] terms = query.toLowerCase().split("\\s+");
         for (Part part : database.values()) {
             String desc = part.getDescription().toLowerCase();

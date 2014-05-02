@@ -10,6 +10,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableModel;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 
 public class SearchWindow {
     private JTextField searchText;
@@ -18,6 +20,7 @@ public class SearchWindow {
 
     private PartDatabase partDB = new PartDatabase();
     private SetDatabase setDB = new SetDatabase();
+    private LoadPartsWorker currentWorker;
 
     public SearchWindow() {
         try {
@@ -47,11 +50,15 @@ public class SearchWindow {
 
     private void searchKeyTyped() {
         String query = searchText.getText();
-        if (query.length() > 0) {
-            List<Part> parts = partDB.textSearch(query);
-            TableModel model = new PartTableModel(parts);
-            resultList.setModel(model);
+        if (currentWorker != null) {
+            try {
+                currentWorker.cancel(true);
+            } catch (CancellationException e) {
+                //e.printStackTrace();
+            }
         }
+        currentWorker = new LoadPartsWorker(query);
+        currentWorker.execute();
     }
 
     public static void main(String[] args) {
@@ -72,6 +79,32 @@ public class SearchWindow {
             e.printStackTrace();
         } catch (UnsupportedLookAndFeelException e) {
             e.printStackTrace();
+        }
+    }
+
+    private class LoadPartsWorker extends SwingWorker<List<Part>, Void> {
+        private String query;
+
+        public LoadPartsWorker(String query) {
+            this.query = query;
+        }
+
+        @Override
+        protected List<Part> doInBackground() throws Exception {
+            return partDB.textSearch(query);
+        }
+
+        @Override
+        protected void done() {
+            try {
+                List<Part> parts = get();
+                TableModel model = new PartTableModel(parts);
+                resultList.setModel(model);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
