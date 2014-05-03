@@ -117,6 +117,9 @@ public class SearchWindow implements IGetIconListener {
                 List<Part> parts = get();
                 TableModel model = new PartTableModel(parts, images, SearchWindow.this);
                 resultList.setModel(model);
+                resultList.getColumnModel().getColumn(0).setMaxWidth(100);
+                resultList.getColumnModel().getColumn(1).setMaxWidth(60);
+                resultList.getColumnModel().getColumn(2).setMaxWidth(60);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {

@@ -30,7 +30,7 @@
             <properties>
               <autoResizeMode value="3"/>
               <fillsViewportHeight value="true"/>
-              <intercellSpacing width="6" height="2"/>
+              <intercellSpacing width="10" height="2"/>
               <showHorizontalLines value="false"/>
               <showVerticalLines value="false"/>
             </properties>
