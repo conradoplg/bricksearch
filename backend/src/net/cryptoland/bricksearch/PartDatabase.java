@@ -63,6 +63,10 @@ public class PartDatabase {
         }
     }
 
+    public Part get(String id) {
+        return database.get(id);
+    }
+
     private class FreqComparator implements Comparator<Part> {
         @Override
         public int compare(Part o1, Part o2) {

@@ -9,6 +9,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CancellationException;
@@ -48,8 +51,34 @@ public class SearchWindow implements IImageViewer {
                 SearchWindow.this.searchKeyTyped();
             }
         });
+        resultList.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    System.out.println("mouse pressed twice!");
+                    int row = resultList.getSelectedRow();
+                    PartTableModel model = (PartTableModel) resultList.getModel();
+                    if (row >= 0 && model != null) {
+                        String id = model.getID(row);
+                        PartWindow partWindow = new PartWindow(id, partDB, setDB, imageCollection);
+                        partWindow.show();
+                    }
+                }
+            }
+        });
         resultList.setRowHeight(50);
         imageCollection = new ImageCollection(this);
+    }
+
+    public JFrame show() {
+        JFrame frame = new JFrame("SearchWindow");
+        frame.setContentPane(this.rootPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 400);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+        return frame;
     }
 
     private void searchKeyTyped() {
@@ -68,13 +97,7 @@ public class SearchWindow implements IImageViewer {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            JFrame frame = new JFrame("SearchWindow");
-            frame.setContentPane(new SearchWindow().rootPanel);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(600, 400);
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
+            new SearchWindow().show();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {

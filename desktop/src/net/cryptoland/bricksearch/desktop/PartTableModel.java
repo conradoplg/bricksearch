@@ -67,6 +67,10 @@ public class PartTableModel extends AbstractTableModel {
         }
     }
 
+    public String getID(int row) {
+        return parts.get(row).getId();
+    }
+
     public void updateIconCell(int row) {
         fireTableCellUpdated(row, 0);
     }
