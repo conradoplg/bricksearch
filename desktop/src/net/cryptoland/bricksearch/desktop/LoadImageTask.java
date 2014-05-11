@@ -11,15 +11,20 @@ import java.net.URL;
 class LoadImageTask {
     public String id;
     public int row;
+    private IImageViewer viewer;
     public ImageIcon icon;
 
-    LoadImageTask(String id, int row) {
+    LoadImageTask(String id, int row, IImageViewer viewer) {
         this.id = id;
         this.row = row;
+        this.viewer = viewer;
     }
 
     public ImageIcon load() {
         try {
+            if (!viewer.isCellVisible(row, 0)) {
+                return null;
+            }
             URL url = new URL("http://rebrickable.com/img/pieces/15/" + id + ".png");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty(
@@ -38,5 +43,9 @@ class LoadImageTask {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void showIcon() {
+        viewer.showIcon(icon, row);
     }
 }

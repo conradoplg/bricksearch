@@ -10,14 +10,11 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingDeque;
 
-public class SearchWindow implements IGetIconListener {
+public class SearchWindow implements IImageViewer {
     private JTextField searchText;
     private JTable resultList;
     private JPanel rootPanel;
@@ -25,9 +22,7 @@ public class SearchWindow implements IGetIconListener {
     private PartDatabase partDB = new PartDatabase();
     private SetDatabase setDB = new SetDatabase();
     private LoadPartsWorker currentWorker;
-    private LoadImageWorker imageWorker;
-    private BlockingDeque<LoadImageTask> imageDeque;
-    private HashMap<String, LoadImageTask> images = new HashMap<String, LoadImageTask>();
+    private ImageCollection imageCollection;
 
     public SearchWindow() {
         try {
@@ -53,10 +48,8 @@ public class SearchWindow implements IGetIconListener {
                 SearchWindow.this.searchKeyTyped();
             }
         });
-        imageDeque = new LinkedBlockingDeque<LoadImageTask>();
-        imageWorker = new LoadImageWorker(imageDeque);
-        imageWorker.execute();
         resultList.setRowHeight(50);
+        imageCollection = new ImageCollection(this);
     }
 
     private void searchKeyTyped() {
@@ -93,12 +86,6 @@ public class SearchWindow implements IGetIconListener {
         }
     }
 
-    @Override
-    public void getIcon(int row, String id) {
-        LoadImageTask task = new LoadImageTask(id, row);
-        imageDeque.addFirst(task);
-    }
-
     private class LoadPartsWorker extends SwingWorker<List<Part>, Void> {
         private String query;
 
@@ -115,7 +102,7 @@ public class SearchWindow implements IGetIconListener {
         protected void done() {
             try {
                 List<Part> parts = get();
-                TableModel model = new PartTableModel(parts, images, SearchWindow.this);
+                TableModel model = new PartTableModel(parts, imageCollection, SearchWindow.this);
                 resultList.setModel(model);
                 resultList.getColumnModel().getColumn(0).setMaxWidth(100);
                 resultList.getColumnModel().getColumn(1).setMaxWidth(60);
@@ -128,38 +115,16 @@ public class SearchWindow implements IGetIconListener {
         }
     }
 
-    private class LoadImageWorker extends SwingWorker<Void, LoadImageTask> {
-        private BlockingDeque<LoadImageTask> deque;
-
-        private LoadImageWorker(BlockingDeque<LoadImageTask> deque) {
-            this.deque = deque;
-        }
-
-        @Override
-        protected Void doInBackground() throws Exception {
-            while (!isCancelled()) {
-                LoadImageTask task = deque.takeFirst();
-                if (isCellVisible(task.row, 0)) {
-                    if (task.load() != null) {
-                        publish(task);
-                    }
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void process(List<LoadImageTask> chunks) {
-            PartTableModel model = (PartTableModel) resultList.getModel();
-            if (model != null) {
-                for (LoadImageTask task: chunks) {
-                    model.addIcon(task);
-                }
-            }
+    @Override
+    public void showIcon(Icon icon, int row) {
+        PartTableModel model = (PartTableModel) resultList.getModel();
+        if (model != null) {
+            model.updateIconCell(row);
         }
     }
 
-    private boolean isCellVisible(int rowIndex, int vColIndex) {
+    @Override
+    public boolean isCellVisible(int rowIndex, int vColIndex) {
         if (!(resultList.getParent() instanceof JViewport)) {
             return false;
         }

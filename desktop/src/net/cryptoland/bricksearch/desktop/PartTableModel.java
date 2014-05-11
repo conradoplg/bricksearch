@@ -9,14 +9,14 @@ import java.util.List;
 
 public class PartTableModel extends AbstractTableModel {
     private List<Part> parts;
-    private HashMap<String, LoadImageTask> images;
+    private ImageCollection images;
     private String[] columnHeaders = {"", "ID", "Usage", "Description"};
-    private IGetIconListener iconListener;
+    private IImageViewer viewer;
 
-    public PartTableModel(List<Part> parts, HashMap<String, LoadImageTask> images, IGetIconListener iconListener) {
+    public PartTableModel(List<Part> parts, ImageCollection images, IImageViewer viewer) {
         this.parts = parts;
         this.images = images;
-        this.iconListener = iconListener;
+        this.viewer = viewer;
     }
 
     @Override
@@ -55,12 +55,7 @@ public class PartTableModel extends AbstractTableModel {
         Part part = parts.get(rowIndex);
         switch (columnIndex) {
             case 0:
-                LoadImageTask task = images.get(parts.get(rowIndex).getId());
-                if (task == null) {
-                    iconListener.getIcon(rowIndex, parts.get(rowIndex).getId());
-                    return null;
-                }
-                return task.icon;
+                return images.get(parts.get(rowIndex).getId(), rowIndex, viewer);
             case 1:
                 return part.getId();
             case 2:
@@ -72,8 +67,7 @@ public class PartTableModel extends AbstractTableModel {
         }
     }
 
-    public void addIcon(LoadImageTask task) {
-        images.put(task.id, task);
-        fireTableCellUpdated(task.row, 0);
+    public void updateIconCell(int row) {
+        fireTableCellUpdated(row, 0);
     }
 }
