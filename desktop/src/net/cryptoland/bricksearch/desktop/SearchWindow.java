@@ -3,6 +3,7 @@ package net.cryptoland.bricksearch.desktop;
 import net.cryptoland.bricksearch.Part;
 import net.cryptoland.bricksearch.PartDatabase;
 import net.cryptoland.bricksearch.SetDatabase;
+import net.cryptoland.bricksearch.UserPartDatabase;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -11,13 +12,13 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 public class SearchWindow implements IImageViewer {
+    private UserPartDatabase userPartDB;
     private JTextField searchText;
     private JTable resultList;
     private JPanel rootPanel;
@@ -32,6 +33,9 @@ public class SearchWindow implements IImageViewer {
             partDB.loadCSV("pieces.csv");
             setDB.loadCSV("set_pieces.csv");
             partDB.loadSetsStatistics(setDB);
+            userPartDB = new UserPartDatabase(setDB);
+            userPartDB.loadSetTSV("rebrickable_sets_basebrick.tsv");
+            userPartDB.loadPartCSV("rebrickable_parts_myparts.csv");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -55,7 +59,6 @@ public class SearchWindow implements IImageViewer {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    System.out.println("mouse pressed twice!");
                     int row = resultList.getSelectedRow();
                     PartTableModel model = (PartTableModel) resultList.getModel();
                     if (row >= 0 && model != null) {
