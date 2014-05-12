@@ -1,9 +1,6 @@
 package net.cryptoland.bricksearch.desktop;
 
-import net.cryptoland.bricksearch.Part;
-import net.cryptoland.bricksearch.PartDatabase;
-import net.cryptoland.bricksearch.SetDatabase;
-import net.cryptoland.bricksearch.UserPartDatabase;
+import net.cryptoland.bricksearch.*;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -25,6 +22,7 @@ public class SearchWindow implements IImageViewer {
 
     private PartDatabase partDB = new PartDatabase();
     private SetDatabase setDB = new SetDatabase();
+    private ColorDatabase colorDB = new ColorDatabase();
     private LoadPartsWorker currentWorker;
     private ImageCollection imageCollection;
 
@@ -32,6 +30,7 @@ public class SearchWindow implements IImageViewer {
         try {
             partDB.loadCSV("pieces.csv");
             setDB.loadCSV("set_pieces.csv");
+            colorDB.loadCSV("colors.csv");
             partDB.loadSetsStatistics(setDB);
             userPartDB = new UserPartDatabase(setDB);
             userPartDB.loadSetTSV("rebrickable_sets_basebrick.tsv");
@@ -63,7 +62,7 @@ public class SearchWindow implements IImageViewer {
                     PartTableModel model = (PartTableModel) resultList.getModel();
                     if (row >= 0 && model != null) {
                         String id = model.getID(row);
-                        PartWindow partWindow = new PartWindow(id, partDB, setDB, imageCollection);
+                        PartWindow partWindow = new PartWindow(id, partDB, setDB, colorDB, userPartDB, imageCollection);
                         partWindow.show();
                     }
                 }

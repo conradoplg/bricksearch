@@ -33,12 +33,12 @@ public class SetDatabase {
             Set set = database.get(setId);
             if (set == null) {
                 setParts = new ArrayList<SetPart>();
-                set = new Set(setId, setParts);
+                set = new Set(setId, setParts, "");
                 database.put(setId, set);
             } else {
                 setParts = set.getParts();
             }
-            SetPart setPart = new SetPart(arr[1], Integer.valueOf(arr[2]), arr[3], arr[4]);
+            SetPart setPart = new SetPart(arr[1], Integer.valueOf(arr[2]), arr[3], arr[4], setId);
             setParts.add(setPart);
         }
         br.close();

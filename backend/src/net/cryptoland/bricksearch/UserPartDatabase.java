@@ -1,13 +1,12 @@
 package net.cryptoland.bricksearch;
 
-import javax.jws.soap.SOAPBinding;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class UserPartDatabase {
@@ -19,6 +18,36 @@ public class UserPartDatabase {
 
     public UserPartDatabase(SetDatabase setDB) {
         this.setDB = setDB;
+    }
+
+    public Map<String, List<SetPart>> getPartOwnershipData(String id) {
+        HashMap<String, List<SetPart>> map = new HashMap<String, List<SetPart>>();
+        for (Set set: sets.values()) {
+            for (SetPart part: set.getParts()) {
+                if (part.getPartID().equals(id)) {
+                    List<SetPart> parts = map.get(part.getColorID());
+                    if (parts == null) {
+                        parts = new ArrayList<SetPart>();
+                        map.put(part.getColorID(), parts);
+                    }
+                    for (int i = 0; i < setCounts.get(set.getId()); i++) {
+                        parts.add(part);
+                    }
+                }
+            }
+        }
+        for (SetPart part: looseParts) {
+            if (part.getPartID().equals(id)) {
+                List<SetPart> parts = map.get(part.getColorID());
+                if (parts == null) {
+                    parts = new ArrayList<SetPart>();
+                    map.put(part.getColorID(), parts);
+                }
+                parts.add(part);
+            }
+        }
+        log.info("Part " + id + ": " + map.size() + " colors");
+        return map;
     }
 
     public void loadSetTSV(String filename) throws IOException {
@@ -47,10 +76,10 @@ public class UserPartDatabase {
             String partID = arr[0];
             String colorID = arr[1];
             int count = Integer.parseInt(arr[2]);
-            SetPart setPart = new SetPart(partID, count, colorID, "0");
+            SetPart setPart = new SetPart(partID, count, colorID, "0", "");
             looseParts.add(setPart);
         }
         br.close();
-        log.info("Loaded " + sets.size() + " distinct sets, " + setCounts.size() + " total");
+        log.info("Loaded " + looseParts.size() + " distinct loose parts");
     }
 }

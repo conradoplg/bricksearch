@@ -5,6 +5,7 @@ import java.util.List;
 public class Set {
     String id;
     List<SetPart> parts;
+    String name;
 
     public String getId() {
         return id;
@@ -14,8 +15,9 @@ public class Set {
         return parts;
     }
 
-    public Set(String id, List<SetPart> parts) {
+    public Set(String id, List<SetPart> parts, String name) {
         this.id = id;
         this.parts = parts;
+        this.name = name;
     }
 }
