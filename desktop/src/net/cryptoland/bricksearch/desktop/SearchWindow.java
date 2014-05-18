@@ -7,51 +7,65 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 public class SearchWindow implements IImageViewer {
-    private UserPartDatabase userPartDB;
     private JTextField searchText;
     private JTable resultList;
     private JPanel rootPanel;
+    private JCheckBox ownedCheck;
+    private JComboBox colorCombo;
 
-    private PartDatabase partDB = new PartDatabase();
-    private SetDatabase setDB = new SetDatabase();
-    private ColorDatabase colorDB = new ColorDatabase();
+    private Database database;
     private LoadPartsWorker currentWorker;
     private ImageCollection imageCollection;
 
     public SearchWindow() {
         try {
-            partDB.loadCSV("pieces.csv");
-            setDB.loadCSV("set_pieces.csv");
-            colorDB.loadCSV("colors.csv");
-            partDB.loadSetsStatistics(setDB);
-            userPartDB = new UserPartDatabase(setDB);
-            userPartDB.loadSetTSV("rebrickable_sets_basebrick.tsv");
-            userPartDB.loadPartCSV("rebrickable_parts_myparts.csv");
+            database = new Database();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        colorCombo.addItem("Any");
+        for (String id: database.getColorDB().getIDs()) {
+            colorCombo.addItem(database.getColorDB().getDescription(id));
+        }
+        resultList.setRowHeight(50);
+        imageCollection = new ImageCollection();
+        setupListeners();
+    }
+
+    private void setupListeners() {
         searchText.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                SearchWindow.this.searchKeyTyped();
+                SearchWindow.this.searchPart();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                SearchWindow.this.searchKeyTyped();
+                SearchWindow.this.searchPart();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                SearchWindow.this.searchKeyTyped();
+                SearchWindow.this.searchPart();
+            }
+        });
+        ownedCheck.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                SearchWindow.this.searchPart();
+            }
+        });
+        colorCombo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SearchWindow.this.searchPart();
             }
         });
         resultList.addMouseListener(new MouseAdapter() {
@@ -62,14 +76,12 @@ public class SearchWindow implements IImageViewer {
                     PartTableModel model = (PartTableModel) resultList.getModel();
                     if (row >= 0 && model != null) {
                         String id = model.getID(row);
-                        PartWindow partWindow = new PartWindow(id, partDB, setDB, colorDB, userPartDB, imageCollection);
+                        PartWindow partWindow = new PartWindow(id, database, imageCollection);
                         partWindow.show();
                     }
                 }
             }
         });
-        resultList.setRowHeight(50);
-        imageCollection = new ImageCollection(this);
     }
 
     public JFrame show() {
@@ -83,8 +95,14 @@ public class SearchWindow implements IImageViewer {
         return frame;
     }
 
-    private void searchKeyTyped() {
+    private void searchPart() {
         String query = searchText.getText();
+        boolean owned = ownedCheck.isSelected();
+        int colorSel = colorCombo.getSelectedIndex();
+        String colorID = null;
+        if (colorSel > 0) {
+            colorID = database.getColorDB().getIDs()[colorSel - 1];
+        }
         if (currentWorker != null) {
             try {
                 currentWorker.cancel(true);
@@ -92,7 +110,8 @@ public class SearchWindow implements IImageViewer {
                 //e.printStackTrace();
             }
         }
-        currentWorker = new LoadPartsWorker(query);
+        imageCollection.stopLoading();
+        currentWorker = new LoadPartsWorker(query, owned, colorID);
         currentWorker.execute();
     }
 
@@ -113,14 +132,18 @@ public class SearchWindow implements IImageViewer {
 
     private class LoadPartsWorker extends SwingWorker<List<Part>, Void> {
         private String query;
+        private boolean owned;
+        private String colorID;
 
-        public LoadPartsWorker(String query) {
+        public LoadPartsWorker(String query, boolean owned, String colorID) {
             this.query = query;
+            this.owned = owned;
+            this.colorID = colorID;
         }
 
         @Override
         protected List<Part> doInBackground() throws Exception {
-            return partDB.textSearch(query);
+            return database.searchPart(query, owned, colorID);
         }
 
         @Override

@@ -11,7 +11,7 @@ public class ImageCollection {
     private BlockingDeque<LoadImageTask> loadDeque = new LinkedBlockingDeque<LoadImageTask>();
     private HashMap<String, Icon> images = new HashMap<String, Icon>();
 
-    public ImageCollection(IImageViewer viewer) {
+    public ImageCollection() {
         loadWorker = new LoadImageWorker();
         loadWorker.execute();
     }
@@ -23,6 +23,11 @@ public class ImageCollection {
             loadDeque.addFirst(task);
         }
         return icon;
+    }
+
+    public void stopLoading() {
+        while (loadDeque.pollLast() != null)
+            ;
     }
 
     private class LoadImageWorker extends SwingWorker<Void, LoadImageTask> {

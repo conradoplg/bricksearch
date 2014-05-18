@@ -27,4 +27,8 @@ public class ColorDatabase {
         br.close();
         log.info("Loaded " + database.size() + " colors");
     }
+
+    public String[] getIDs() {
+        return database.keySet().toArray(new String[0]);
+    }
 }

@@ -17,20 +17,14 @@ public class PartWindow implements IImageViewer {
     private JPanel rootPanel;
     private JTextPane ownershipPane;
     private JScrollPane ownershipPaneScroll;
-    private String id;
     private PartDatabase partDB;
-    private SetDatabase setDB;
     private ColorDatabase colorDB;
     private UserPartDatabase userPartDB;
-    private ImageCollection imageCollection;
 
-    public PartWindow(String id, PartDatabase partDB, SetDatabase setDB, ColorDatabase colorDB, UserPartDatabase userPartDB, ImageCollection imageCollection) {
-        this.id = id;
-        this.partDB = partDB;
-        this.setDB = setDB;
-        this.colorDB = colorDB;
-        this.userPartDB = userPartDB;
-        this.imageCollection = imageCollection;
+    public PartWindow(String id, Database database, ImageCollection imageCollection) {
+        this.partDB = database.getPartDB();
+        this.colorDB = database.getColorDB();
+        this.userPartDB = database.getUserPartDB();
 
         ownershipPane.addHyperlinkListener(new HyperlinkListener() {
             @Override
