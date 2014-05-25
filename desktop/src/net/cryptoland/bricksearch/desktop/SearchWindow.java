@@ -31,7 +31,7 @@ public class SearchWindow implements IImageViewer {
             e.printStackTrace();
         }
         colorCombo.addItem("Any");
-        for (String id: database.getColorDB().getIDs()) {
+        for (String id: database.getSortedColorIDs()) {
             colorCombo.addItem(database.getColorDB().getDescription(id));
         }
         resultList.setRowHeight(50);
@@ -101,7 +101,7 @@ public class SearchWindow implements IImageViewer {
         int colorSel = colorCombo.getSelectedIndex();
         String colorID = null;
         if (colorSel > 0) {
-            colorID = database.getColorDB().getIDs()[colorSel - 1];
+            colorID = database.getSortedColorIDs()[colorSel - 1];
         }
         if (currentWorker != null) {
             try {
