@@ -56,8 +56,9 @@ public class PartWindow implements IImageViewer {
             int count = 0;
             String colorText = "<ul>";
             for (SetPart setPart: ownershipData.get(colorID)) {
+                Set set = database.getSetDB().getSet(setPart.getSetID());
                 count += setPart.getQuantity();
-                colorText += "<li>" + setPart.getQuantity() + " in <a href=\"http://brickset.com/sets/" + setPart.getSetID() + "\">" + setPart.getSetID() + "</a></li>";
+                colorText += "<li>" + setPart.getQuantity() + " in <a href=\"http://brickset.com/sets/" + setPart.getSetID() + "\">" + setPart.getSetID() + "</a> " + set.getName() + "</li>";
             }
             colorText += "</ul>";
             ownershipText += "<p>" + count + " in " + colorDB.getDescription(colorID) + "</p>";

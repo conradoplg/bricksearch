@@ -57,8 +57,10 @@ public class UserPartDatabase {
             String[] arr = line.split("\t");
             int count = Integer.parseInt(arr[0]);
             String setID = arr[1];
+            String name = arr[2];
             Set set = setDB.getSet(setID);
             if (set != null) {
+                set.setName(name);
                 sets.put(setID, set);
                 setCounts.put(setID, setCounts.containsKey(setID) ? setCounts.get(setID) + 1 : 1);
             }

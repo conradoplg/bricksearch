@@ -20,4 +20,15 @@ public class Set {
         this.parts = parts;
         this.name = name;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        if (name == null) {
+            return "";
+        }
+        return name;
+    }
 }
