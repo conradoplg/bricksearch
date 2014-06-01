@@ -9,6 +9,7 @@ import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -37,6 +38,14 @@ public class SearchWindow implements IImageViewer {
         resultList.setRowHeight(50);
         imageCollection = new ImageCollection();
         setupListeners();
+        HashSet forward = new HashSet(
+                resultList.getFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS));
+        forward.add(KeyStroke.getKeyStroke("TAB"));
+        resultList.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, forward);
+        HashSet backward = new HashSet(
+                resultList.getFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS));
+        backward.add(KeyStroke.getKeyStroke("shift TAB"));
+        resultList.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, backward);
     }
 
     private void setupListeners() {
